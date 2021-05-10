@@ -1,6 +1,8 @@
 import math
 import statistics
-from pynput import mouse # please use v1.6.8
+
+from pynput import mouse  # please use v1.6.8
+
 
 def main():
     info = {

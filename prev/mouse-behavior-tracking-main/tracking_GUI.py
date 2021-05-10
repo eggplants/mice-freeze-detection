@@ -1,12 +1,12 @@
-from datetime import datetime
-import gc
 import time
+import tkinter as tk
+from datetime import datetime
 
 import cv2
 import numpy as np
 import serial
 from serial.tools import list_ports
-import tkinter as tk
+
 
 class DeviceInfo():
     def __init__(self):
