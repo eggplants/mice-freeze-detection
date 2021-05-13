@@ -19,6 +19,13 @@ def load_video(path: str) -> cv2.VideoCapture:
         return video.get(cv2.CAP_PROP_FRAME_COUNT)
 
     video = cv2.VideoCapture(path)
+    video.open(1 + cv2.CAP_DSHOW)
+    fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
+    video.set(cv2.CAP_PROP_FOURCC, fourcc)
+    video.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+    video.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+    video.set(cv2.CAP_PROP_FPS, 60)
+
     if get_frame_length(video) == 0:
         raise VideoFrameIsEmpty
     else:
