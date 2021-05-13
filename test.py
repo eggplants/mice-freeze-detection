@@ -1,12 +1,5 @@
-from time import sleep
-
 import cv2
 import numpy as np
-
-i = 0
-
-THRESHOLD = 30
-
 
 class VideoFrameIsEmpty(Exception):
     pass
@@ -25,54 +18,80 @@ def load_video(path: str) -> cv2.VideoCapture:
         return video
 
 
-def binarize(image: np.ndarray) -> np.ndarray:
-    "convert image to binarized one"
-    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+def get_frame_length(video: cv2.VideoCapture) -> float:
+    "get video size as number of frames"
+    return video.get(cv2.CAP_PROP_FRAME_COUNT)
 
 
-def diff_image(im1: np.ndarray, im2: np.ndarray) -> np.ndarray:
-    "measure difference between 2 images"
-    return cv2.absdiff(im1, im2)
+def each_cons(arr: list, n: int) -> list:
+    "Ruby Array#each_cons(n)"
+    return [arr[i:i+n] for i in range(len(arr)-n+1)]
 
 
-def read_frame(video: cv2.VideoCapture):
-    "read a frame from video object"
-    load_status, data = video.read()
-    if load_status:
-        return data
-    else:
-        raise VideoFrameIsEmpty(
-            'current frame is perhaps at end of video.')
+def xor_image(im1: np.ndarray, im2: np.ndarray) -> np.ndarray:
+    "xor 2 images"
+    return cv2.bitwise_xor(im1, im2)
 
 
-def show_images(image: np.ndarray, window_name: str) -> None:
+def show_image(image: np.ndarray, window_name: str) -> None:
     "open window and show image"
     cv2.imshow(window_name, image)
+
+def count_moved_dots(frames: np.ndarray) -> list:
+    moved_dots = []    
+    for fr in frames:
+        cnt = 0
+        for dots in fr:
+            cnt += sum(1 if x != [0, 0, 0] else 0 for x in dots.tolist())
+            
+        moved_dots.append(cnt)
+
+    return moved_dots
 
 
 def main():
     PATH = './contextA.avi'
     video = load_video(PATH)
+    frames = []
+    wait_sec = int(1000 / video.get(cv2.CAP_PROP_FPS))
+    video_len = get_frame_length(video)
+    show = False
+    if input("show windows?(if wanna show {} frames, type 'y')".format(video_len)).rstrip() == 'y':
+        show = True
 
-    bg_data = binarize(read_frame(video))
-    idx = -1
-    while video.isOpened():
-        idx += 1
-        print(idx)
-        r = read_frame(video)
-        current_data = binarize(r)
-        # 差分の絶対値
-        mask = diff_image(current_data, bg_data)
-        mask[mask < THRESHOLD] = 0
-        mask[mask >= THRESHOLD] = 255
-        # show_images(mask, "masked image")
-        show_images(r, "current")
-        # 背景画像の更新(if idx % 30:)
-        bg_data = binarize(read_frame(video))
-        sleep(0.1)
+    # MOG - a background substract algorithm (from opencv-contrib)
+    # See: http://personal.ee.surrey.ac.uk/Personal/R.Bowden/publications/avbs01/avbs01.pdf
+    # Also: https://docs.opencv.org/master/d6/da7/classcv_1_1bgsegm_1_1BackgroundSubtractorMOG.html
 
+    model = cv2.bgsegm.createBackgroundSubtractorMOG()
+    while True:
+        ret, frame = video.read()
+        if not ret:
+            break
+
+        mask = model.apply(frame)
+        frame[mask == 0] = 0
+        frames.append(frame)
+        if show:
+            show_image(frame, "masked frame")
+            cv2.waitKey(wait_sec)
+
+    cv2.destroyAllWindows()
+
+    # useless???
+    # measure moving again
+    xor_frames = []
     video.release()
+    for x, y in each_cons(frames, 2):
+        f = xor_image(x, y)
+        xor_frames.append(f)
+        if show:
+            show_image(f, "xored frame")
+            cv2.waitKey(wait_sec)
 
+    c = count_moved_dots(xor_frames)
+
+    print(len(c))
 
 if __name__ == '__main__':
     try:
