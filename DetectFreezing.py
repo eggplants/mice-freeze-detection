@@ -92,7 +92,7 @@ class DetectFreezing:
                 cv2.waitKey(self.__wait_sec)
         else:
             # reload video file buffer
-            self.video = self.video.set(cv2.cv.CV_CAP_PROP_POS_FRAMES, 0)
+            self.video = self.video.set(cv2.CV_CAP_PROP_POS_FRAMES, 0)
 
         return self._count_moved_dots(xor_frames)
 
