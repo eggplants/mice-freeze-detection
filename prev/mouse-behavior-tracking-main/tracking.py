@@ -37,7 +37,7 @@ def select_port():
     try:
         ser.open()
         return ser
-    except:
+    except Exception:
         print("error when opening serial")
         return None
 
@@ -83,7 +83,7 @@ class mouseinfo():
             self.centerY.append(cy)
             self.centlist.append(
                 (self.centerX[-2] - self.centerX[-1])**2 + (self.centerY[-2] - self.centerY[-1])**2)
-        except:
+        except Exception:
             self.centlist.append(0)
 
         # cation cahnegd
@@ -158,8 +158,9 @@ def video_body(ser, C):
                 break
             elif t2 - t1 > 25200:
                 break
-        else:            t2 = time.perf_counter()
-            break
+            else:
+                t2 = time.perf_counter()
+                break
 
     csvfile.close()
     cap.release()
