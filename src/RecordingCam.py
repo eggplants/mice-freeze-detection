@@ -17,9 +17,25 @@ class RecordingCam():
             self.camera.get(cv2.CAP_PROP_FRAME_WIDTH),
             self.camera.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.__wait_sec = int(1000 / self.camera.get(cv2.CAP_PROP_FPS))
+        print(self.video_size_info, self.__wait_sec)
+
+    @staticmethod
+    def get_camid_list():
+        """Get a list of ids of camera device."""
+        from itertools import count
+        ids = []
+        for i in count():
+            cap = cv2.VideoCapture(i)
+            if cap.read()[0]:
+                ids.append(i)
+            else:
+                break
+            cap.release()
+        return ids
 
     def rec(self, f_base="output", f_ext: str = "avi",
             frame_rate: int = 60, show_window=True) -> None:
+        """Recording with camera"""
 
         fname = "{}-{}.{}".format(f_base, self.make_timestamp, f_ext)
         out_file = cv2.VideoWriter(fname, -1, frame_rate, self.video_size_info)
@@ -54,4 +70,8 @@ class RecordingCam():
 
 
 if __name__ == '__main__':
-    RecordingCam().rec()
+    lis = RecordingCam.get_camid_list()
+    print('available cams: ', lis)
+    cam_id = int(input('gemmie id:'))
+    if cam_id in lis:
+        RecordingCam(cam_id).rec()

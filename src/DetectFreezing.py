@@ -1,5 +1,8 @@
 import cv2
 import numpy as np
+import pprint
+import os
+import pyqtgraph as pg
 
 
 class VideoFrameIsEmpty(Exception):
@@ -92,15 +95,51 @@ class DetectFreezing:
                 cv2.waitKey(self.__wait_sec)
         else:
             # reload video file buffer
-            self.video = self.video.set(cv2.CV_CAP_PROP_POS_FRAMES, 0)
+            self.video = self.video.set(cv2.CAP_PROP_POS_FRAMES, 0)
+
+        self.processed_video = xor_frames
 
         return self._count_moved_dots(xor_frames)
+
+    def show_graph(self, data):
+        # 上画面にgraph
+        win = pg.GraphicsLayoutWidget(show=True)
+        freeze_graph = win.addPlot()
+        freeze_graph.plot(data, title="test graph")
+
+        win.nextRow()
+
+        # 下画面にvideo
+        mice_video_frame = pg.ImageItem(self.processed_video[0])
+        mice_video_frame.setImage()
+        view_box = pg.ViewBox()
+        view_box.addItem(mice_video_frame)
+        # plot = pg.PlotItem(viewBox=view_box)
+        win.addItem(view_box)
+        return win
+        # pg.mkQApp('Freezing Graph').exec_()
+
 
 
 if __name__ == '__main__':
     try:
-        d = DetectFreezing("./contextA.avi")
-        print(d.detect())
+        video_path = os.path.join(os.path.dirname(__file__), '..', 'videos', 'contextA.avi')
+        d = DetectFreezing(video_path)
+        s = input('show window?([n]/y): ')
+        print('detecting...')
+        if s.rstrip() == 'y':
+            data = d.detect()
+        else:
+            data = d.detect(show_window=False)
+
+        print('detected!')
+        # pprint.pprint(data, open('a.data', 'w'))
+        s = input('show graph?([y]/n): ')
+        if not s.rstrip() == 'n':
+            print('plotting...')
+            d.show_graph(data)
+        
+
     except KeyboardInterrupt:
         pass
 

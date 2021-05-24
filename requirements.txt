@@ -1,4 +1,5 @@
 opencv-python
 opencv-contrib-python
 pyqtgraph
-pyqt5
+PySide6
+pyinstaller
