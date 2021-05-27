@@ -1,8 +1,7 @@
+import os
+
 import cv2
 import numpy as np
-import pprint
-import os
-import pyqtgraph as pg
 
 
 class VideoFrameIsEmpty(Exception):
@@ -10,19 +9,13 @@ class VideoFrameIsEmpty(Exception):
 
 
 class DetectFreezing:
+    """Detect moving and freezing behavior from an avi video file."""
+
     def __init__(self, video_path):
         self.video_path = video_path
         self.video = self._load_video(video_path)
         self.__wait_sec = int(1000 / self.video.get(cv2.CAP_PROP_FPS))
         self.__video_len = self._get_frame_length(self.video)
-
-    # @property
-    # def wait_sec(self):
-    #     pass
-
-    # @property
-    # def show_window(self):
-    #     pass
 
     @staticmethod
     def _load_video(path: str) -> cv2.VideoCapture:
@@ -49,7 +42,7 @@ class DetectFreezing:
 
     @staticmethod
     def _xor_image(im1: np.ndarray, im2: np.ndarray) -> np.ndarray:
-        "Xor 2 images"
+        "Xor 2 images."
         return cv2.bitwise_xor(im1, im2)
 
     @staticmethod
@@ -65,65 +58,79 @@ class DetectFreezing:
 
         return moved_dots
 
+    def convert_boolean_with_threshold(self, threshold: int):
+        return np.array([(0 if i > threshold else 1)
+                         for i in self.data])
+
     def detect(self,
                model=cv2.bgsegm.createBackgroundSubtractorMOG(),
                show_window=True) -> np.ndarray:
         """Detect movement w/MOG - a background substract method by default."""
         frames = []
+        # for reload video
+        if show_window:
+            xor_frames = self._detect_with_window(frames, model)
+        else:
+            xor_frames = self._detect(frames, model)
+
+        self.processed_video = xor_frames
+        self.video.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        return self._count_moved_dots(xor_frames)
+
+    def _detect_with_window(self, frames, model):
         ret, frame = self.video.read()
         while ret:
             mask = model.apply(frame)
             frame[mask == 0] = 0
             frames.append(frame)
-            if show_window:
-                cv2.imshow("masked frame", frame)
-                cv2.waitKey(self.__wait_sec)
-
+            cv2.imshow("masked frame", frame)
+            cv2.waitKey(self.__wait_sec)
             ret, frame = self.video.read()
 
         cv2.destroyAllWindows()
 
-        # useless???
         # measure moving again
         xor_frames = []
         self.video.release()
         for x, y in self._each_cons(frames, 2):
             f = self._xor_image(x, y)
             xor_frames.append(f)
-            if show_window:
-                cv2.imshow("xored frame", f)
-                cv2.waitKey(self.__wait_sec)
+            cv2.imshow("xored frame", f)
+            cv2.waitKey(self.__wait_sec)
+
+        return xor_frames
+
+    # TODO: 要高速化
+    def _detect(self, frames, model):
+        ret, frame = self.video.read()
+        while ret:
+            mask = model.apply(frame)
+            frame[mask == 0] = 0
+            frames.append(frame)
+            ret, frame = self.video.read()
+
+        cv2.destroyAllWindows()
+
+        # measure moving again
+        xor_frames = []
+        self.video.release()
+        for x, y in self._each_cons(frames, 2):
+            f = self._xor_image(x, y)
+            xor_frames.append(f)
+
+        return xor_frames
+
+    def get_video(self):
+        if hasattr(self, 'processed_video'):
+            return (self.video, self.processed_video)
         else:
-            # reload video file buffer
-            self.video = self.video.set(cv2.CAP_PROP_POS_FRAMES, 0)
-
-        self.processed_video = xor_frames
-
-        return self._count_moved_dots(xor_frames)
-
-    def show_graph(self, data):
-        # 上画面にgraph
-        win = pg.GraphicsLayoutWidget(show=True)
-        freeze_graph = win.addPlot()
-        freeze_graph.plot(data, title="test graph")
-
-        win.nextRow()
-
-        # 下画面にvideo
-        mice_video_frame = pg.ImageItem(self.processed_video[0])
-        mice_video_frame.setImage()
-        view_box = pg.ViewBox()
-        view_box.addItem(mice_video_frame)
-        # plot = pg.PlotItem(viewBox=view_box)
-        win.addItem(view_box)
-        return win
-        # pg.mkQApp('Freezing Graph').exec_()
-
+            return (self.video, None)
 
 
 if __name__ == '__main__':
     try:
-        video_path = os.path.join(os.path.dirname(__file__), '..', 'videos', 'contextA.avi')
+        video_path = os.path.join(os.path.dirname(
+            __file__), '..', 'videos', 'contextA.avi')
         d = DetectFreezing(video_path)
         s = input('show window?([n]/y): ')
         print('detecting...')
@@ -133,12 +140,14 @@ if __name__ == '__main__':
             data = d.detect(show_window=False)
 
         print('detected!')
+        # import pprint
         # pprint.pprint(data, open('a.data', 'w'))
         s = input('show graph?([y]/n): ')
         if not s.rstrip() == 'n':
+            import DetectedWidget
             print('plotting...')
-            d.show_graph(data)
-        
+            DetectedWidget.DetectedWidget(
+                data, *d.get_video())
 
     except KeyboardInterrupt:
         pass
