@@ -6,8 +6,8 @@ import sys
 import time
 
 import MakeCSV
+from __init__ import __version__
 
-__version__ = '0.0.1'
 # __cmd__ = 'mf'
 __cmd__ = sys.argv[0]
 
