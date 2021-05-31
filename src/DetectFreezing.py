@@ -58,9 +58,10 @@ class DetectFreezing:
 
         return moved_dots
 
-    def convert_boolean_with_threshold(self, threshold: int):
+    @staticmethod
+    def convert_boolean_with_threshold(data: np.ndarray, threshold: int = 10):
         return np.array([(0 if i > threshold else 1)
-                         for i in self.data])
+                         for i in data])
 
     def detect(self,
                model=cv2.bgsegm.createBackgroundSubtractorMOG(),

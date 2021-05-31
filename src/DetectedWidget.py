@@ -1,13 +1,5 @@
-import os
-import sys
-
-import cv2
 import pyqtgraph as pg
-from PySide6.QtCore import QSize, Qt, Slot
-from PySide6.QtGui import QAction
-from PySide6.QtWidgets import (QDialog, QFileDialog, QHBoxLayout, QLabel,
-                               QLineEdit, QMainWindow, QPushButton,
-                               QVBoxLayout, QWidget)
+from PySide6.QtWidgets import QWidget
 
 
 class DetectedWidget(QWidget):
