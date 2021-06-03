@@ -82,12 +82,14 @@ class mouseinfo():
             self.centerX.append(cx)
             self.centerY.append(cy)
             self.centlist.append(
-                (self.centerX[-2] - self.centerX[-1])**2 + (self.centerY[-2] - self.centerY[-1])**2)
+                (self.centerX[-2] - self.centerX[-1])**2 +
+                (self.centerY[-2] - self.centerY[-1])**2)
         except Exception:
             self.centlist.append(0)
 
         # cation cahnegd
-        return 300*np.abs((self.centlist[i] - np.mean(self.centlist))/np.std(self.centlist))
+        return 300*np.abs((self.centlist[i] - np.mean(self.centlist)) /
+                          np.std(self.centlist))
 
 
 # =============================================================================-
@@ -111,7 +113,7 @@ def video_body(ser, C):
     i = 0
     while(cap.isOpened()):
         ret, frame = cap.read()
-        if ret == True:
+        if ret:
             i += 1
             t1 = time.perf_counter()
         # ========================画像処理=============================================================
@@ -132,7 +134,7 @@ def video_body(ser, C):
             infos = info_str[0:6] + "," + \
                 str(int((t1-t0)/10)) + "," + timestamp
             ser.reset_output_buffer()
-            #allinfo = info_str + "," + str(int((t1-t0)/10))  + "," +timestamp
+            # allinfo = info_str + "," + str(int((t1-t0)/10))  + "," +timestamp
             print(infos)
             csvfile.write(infos)
             csvfile.write("\n")
@@ -143,13 +145,14 @@ def video_body(ser, C):
                 # put round
                 cv2.circle(mb, (C.centerX[i], C.centerY[i]),
                            10, (150, 150, 150),  thickness=4)
-            except:
+            except Exception:
                 # last point
                 cv2.circle(mb, (C.centerX[-1], C.centerY[-1]),
                            10, (150, 150, 150), thickness=4)
 
             out_frame_color = cv2.cvtColor(cv2.hconcat(
-                [mb, cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)]), cv2.COLOR_GRAY2BGR)
+                [mb, cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)]),
+                cv2.COLOR_GRAY2BGR)
             out.write(out_frame_color)
             cv2.imshow("frames", out_frame_color)
 
@@ -170,7 +173,7 @@ def video_body(ser, C):
 
 # ---port open--- -----  ---------      ------------   ------    --------
 ser = select_port()
-# ---connection show-------- ---------  ----------- ------- ------- -----------   -------------
+# ---connection show-------- ---------  ----------- ------- ------- -----
 # show_connection(ser)
 
 # center 用クラス初期化
