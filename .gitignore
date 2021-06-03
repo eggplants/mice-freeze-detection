@@ -141,3 +141,10 @@ cython_debug/
 *.save
 *.vscode/
 *.csv
+
+dist/
+build/
+venv/
+__pycache__/
+*.spec
+*.csv

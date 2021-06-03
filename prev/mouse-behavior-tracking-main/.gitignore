@@ -1,7 +1,0 @@
-dist/
-build/
-venv/
-__pycache__/
-*.spec
-*.avi
-*.csv
