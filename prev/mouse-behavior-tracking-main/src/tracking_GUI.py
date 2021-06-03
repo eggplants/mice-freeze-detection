@@ -33,6 +33,15 @@ def get_device_num(message, device_info):
     root.mainloop()
 
 
+def get_ans(question, selections=["y", "n"]):
+    reply = input(question)
+    selections = list(map(str,  selections))
+    if reply in selections:
+        return reply
+    else:
+        return get_ans("invalid answer. retry: ", selections)
+
+
 def raise_error(message):
     root = tk.Tk()
     frame = tk.Frame(root)
@@ -66,7 +75,9 @@ def select_port():
         for i in range(len(devices)):
             print('%3d: open %s' % (i, devices[i]))
         device_info = DeviceInfo()
-        get_device_num('please input number of target port:', device_info)
+        device_num = get_ans('target port ({}): '.format(
+            ", ".join(map(str, [*range(len(devices))]))), [*range(len(devices))])
+        device_info.num = int(device_num)
         ser.port = devices[device_info.num]
 
     try:
@@ -123,8 +134,18 @@ class mouseinfo():
 
 
 def video_body(ser, C):
+
+    # set cam device num:
     camera_info = DeviceInfo()
-    get_device_num('please input number of target camera device:', camera_info)
+    device_num = int(
+        get_ans('camera device (0, 1, 2, ...): ', [*range(10)]))
+    camera_info.num = device_num
+
+    # set if save:
+    if get_ans('video save?(y/n): ') == 'y':
+        save_video = True
+    else:
+        save_video = False
 
     cap = cv2.VideoCapture(camera_info.num)
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -133,7 +154,8 @@ def video_body(ser, C):
         '.', '-').replace(':', '-') + str('.avi')
     csvfilename = nowtime.replace(' ', '').replace(
         '.', '-').replace(':', '-') + str('.csv')
-    out = cv2.VideoWriter(filename, fourcc, 10.0, (1280, 480))
+    if save_video:
+        out = cv2.VideoWriter(filename, fourcc, 10.0, (1280, 480))
 
     kernel1 = np.ones((5, 5), np.uint8)
     kernel2 = np.ones((10, 10), np.uint8)
@@ -183,7 +205,8 @@ def video_body(ser, C):
             out_frame_color = cv2.cvtColor(cv2.hconcat(
                 [mb, cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)]),
                 cv2.COLOR_GRAY2BGR)
-            out.write(out_frame_color)
+            if save_video:
+                out.write(out_frame_color)
             cv2.imshow('frames', out_frame_color)
 
             t2 = time.perf_counter()

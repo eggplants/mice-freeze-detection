@@ -92,17 +92,50 @@ class mouseinfo():
                           np.std(self.centlist))
 
 
+def get_cams_list():
+    index = 0
+    arr = []
+    while True:
+        cap = cv2.VideoCapture(index, cv2.CAP_DSHOW)
+        if not cap.read()[0]:
+            break
+        else:
+            arr.append(index)
+        cap.release()
+        index += 1
+    cv2.destroyAllWindows()
+    return arr
+
+
+def get_ans(question, selections=["y", "n"]):
+    reply = input(question)
+    selections = list(map(str,  selections))
+    if reply in selections:
+        return reply
+    else:
+        return get_ans("invalid answer. retry: ", selections)
+
 # =============================================================================-
+
+
 def video_body(ser, C):
-    print('give me camera id:')
-    cap = cv2.VideoCapture(int(input()))
+    cams_list = [*range(3)]
+    cap = cv2.VideoCapture(int(get_ans(
+        'give me camera id ({}...): '.format(cams_list), cams_list)))
+    if get_ans("video save?(y/n): ") == "y":
+        video_save = True
+    else:
+        video_save = False
+
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     nowtime = str(datetime.now())
     filename = nowtime.replace(" ", "").replace(
         ".", "-").replace(":", "-") + str(".avi")
     csvfilename = nowtime.replace(" ", "").replace(
         ".", "-").replace(":", "-") + str(".csv")
-    out = cv2.VideoWriter(filename, fourcc, 10.0, (1280, 480))  # 1280,480
+    if video_save:
+        out = cv2.VideoWriter(filename, fourcc,
+                              10.0, (1280, 480))  # 1280,480
 
     kernel1 = np.ones((5, 5), np.uint8)
     kernel2 = np.ones((10, 10), np.uint8)
@@ -153,7 +186,11 @@ def video_body(ser, C):
             out_frame_color = cv2.cvtColor(cv2.hconcat(
                 [mb, cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)]),
                 cv2.COLOR_GRAY2BGR)
-            out.write(out_frame_color)
+
+            if video_save:
+                out.write(out_frame_color)
+
+            # out.write(out_frame_color)
             cv2.imshow("frames", out_frame_color)
 
             t2 = time.perf_counter()
@@ -167,7 +204,9 @@ def video_body(ser, C):
 
     csvfile.close()
     cap.release()
-    out.release()
+    if video_save:
+        out.release()
+    # out.release()
     cv2.destroyAllWindows()
 
 
