@@ -1,8 +1,7 @@
 import os
 import sys
-import threading
 
-from PySide6.QtCore import QSize, Slot
+from PySide6.QtCore import QSize, QThread, Signal, Slot
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (QFileDialog, QHBoxLayout, QMainWindow,
                                QPushButton, QVBoxLayout, QWidget)
@@ -11,10 +10,20 @@ import DetectedWidget
 import DetectFreezing
 
 
+class Worker(QThread):
+    rtn = Signal(tuple, name='rtn')
+
+    def __init__(self, video_path=None):
+        super(Worker, self).__init__()
+        self.video_path = video_path
+
+    def run(self):
+        d = DetectFreezing.DetectFreezing(self.video_path)
+        data = d.detect(show_window=False)
+        self.rtn.emit((d, data))
+
+
 class MainWindow(QMainWindow):
-
-    processing = False
-
     def __init__(self):
         QMainWindow.__init__(self)
         self.setWindowTitle("Mice Freezing Detection")
@@ -41,7 +50,7 @@ class MainWindow(QMainWindow):
 
         # Status Bar
         self.status = self.statusBar()
-        self.status.showMessage('Open video to be processed')
+        self.status.showMessage('Please open video to be processed')
 
         self._controls()
         self._layout()
@@ -53,12 +62,10 @@ class MainWindow(QMainWindow):
 
     def detect_btn_clicked(self):
         print('processing')
-        if self.processing:
-            return
-        else:
-            self.status.showMessage('Processing - ' + self.video_path)
-            t = threading.Thread(target=self.detect(self.video_path))
-            t.start()
+        if not self.worker.isRunning():
+            self.status.showMessage('Wait... - ' + self.video_path)
+            self.btn_detect.setEnabled(False)
+            self.worker.start()
 
     def _layout(self):
 
@@ -90,17 +97,16 @@ class MainWindow(QMainWindow):
             self.video_path = name
             self.btn_detect.setEnabled(True)
 
-    def detect(self, video):
-        self.processing = True
-        d = DetectFreezing.DetectFreezing(video)
-        data = d.detect(show_window=False)
-        self.processing = False
-        self.status.showMessage('Detected - ' + self.video_path)
+        self.worker = Worker(self.video_path)
+        self.worker.rtn.connect(self.detect)
 
-        # Open a result in new window
+    def detect(self, result):
+        self.status.showMessage('Processed - ' + self.video_path)
+        self.btn_detect.setEnabled(True)
+        d, data = result
         raw_video, video_frames = d.get_video()
         sub = DetectedWidget.DetectedWidget(
-            data, raw_video, video_frames, self)
+            self.video_path, data, raw_video, video_frames, self)
         sub.show()
 
     @Slot()

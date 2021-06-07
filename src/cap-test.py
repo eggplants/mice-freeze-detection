@@ -1,11 +1,13 @@
 import cv2
+import numpy as np
 
-def get_camid_list():
+
+def get_camid_list() -> list[cv2.VideoCapture]:
     """Get a list of ids of camera device."""
     from itertools import count
     ids = []
     for i in count():
-        cap = cv2.VideoCapture(i)
+        cap: cv2.VideoCapture = cv2.VideoCapture(i)
         if cap.read()[0]:
             ids.append(i)
         else:
@@ -13,7 +15,8 @@ def get_camid_list():
         cap.release()
     return ids
 
-def check_camera_connection():
+
+def check_camera_connection() -> None:
     """Check the connection between any camera and the PC."""
     import datetime
 
@@ -31,15 +34,18 @@ def check_camera_connection():
             print("camera_number", camera_number, "None")
     print("detected: ", len(true_camera_is), "cam(s)")
 
-def main():
+
+def main() -> None:
     # VideoCapture オブジェクトを取得します
-    global capture
-    capture = cv2.VideoCapture(0)
+    capture: cv2.VideoCapture = cv2.VideoCapture(0)
 
     while True:
+        ret: bool
+        frame: np.ndarray
         ret, frame = capture.read()
         # resize the window
         cv2.imshow('title', frame)
+
 
 if __name__ == '__main__':
     try:
@@ -48,6 +54,5 @@ if __name__ == '__main__':
         lis = get_camid_list()
         print(lis)
     except KeyboardInterrupt:
-        capture.release()
         cv2.destroyAllWindows()
         exit(1)

@@ -3,11 +3,12 @@ from PySide6.QtWidgets import QWidget
 
 
 class DetectedWidget(QWidget):
-    def __init__(self, data, video, processed_video_frames, parent=None):
+    def __init__(self, video_path, data, raw_video,
+                 processed_video_frames, parent=None):
         super().__init__(parent)
-
+        self.video_path = video_path
         self.data = data
-        self.video = video
+        self.raw_video = raw_video
         self.raw_video_frames = self._get_frames()
         self.processed_video_frames = processed_video_frames
         self.threshold = 30
@@ -16,10 +17,10 @@ class DetectedWidget(QWidget):
 
     def _get_frames(self):
         frames = []
-        ret, frame = self.video.read()
+        ret, frame = self.raw_video.read()
         while ret:
             frames.append(frame)
-            ret, frame = self.video.read()
+            ret, frame = self.raw_video.read()
         else:
             print(len(frames))
             return frames
@@ -30,13 +31,17 @@ class DetectedWidget(QWidget):
         # main graph
         freeze_graph = win.addPlot()
         freeze_graph.setTitle('[Graph]')
+        freeze_graph.setLabel(axis='left', text='Y-axis')
+        freeze_graph.setLabel(axis='bottom', text='X-axis')
         freeze_graph.plot(self.data)
 
         win.nextRow()
 
         # bool graph
         bool_graph = win.addPlot()
-        bool_graph.setTitle('[Bool graph]')
+        bool_graph.setTitle('[Bool graph](th={})'.format(self.threshold))
+        bool_graph.setLabel(axis='left', text='Y-axis')
+        bool_graph.setLabel(axis='bottom', text='X-axis')
         y = self.convert_boolean_with_threshold()
         bar = pg.BarGraphItem(
             x=[i for i in range(len(y))], y=y, height=1, width=0.1)
@@ -51,6 +56,8 @@ class DetectedWidget(QWidget):
             view_box = pg.ViewBox()
             view_box.addItem(mice_video_frame)
             win.addItem(view_box)
+
+        # win.nextRow()
 
         # raw video frame
         if len(self.raw_video_frames) != 0:
