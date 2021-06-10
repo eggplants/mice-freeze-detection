@@ -123,7 +123,7 @@ jobs:
         run: |
           tar -C mice_freeze_detector-macos -pczvf mice_freeze_detector-macos.tar.gz mice_freeze_detector
           tar -C mice_freeze_detector-linux -pczvf mice_freeze_detector-linux.tar.gz mice_freeze_detector
-          zip --junk-paths mice_freeze_detector-windows ./tracking_GUI-windows/mice_freeze_detector.exe
+          zip --junk-paths mice_freeze_detector-windows ./mice_freeze_detector-windows/mice_freeze_detector.exe
 
       - name: Set env
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> "$GITHUB_ENV"

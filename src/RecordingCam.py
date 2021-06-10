@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import cv2  # type: ignore
+import cv2
 import numpy as np
 
 

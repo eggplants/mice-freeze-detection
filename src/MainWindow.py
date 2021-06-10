@@ -7,8 +7,8 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (QFileDialog, QHBoxLayout, QMainWindow,
                                QPushButton, QVBoxLayout, QWidget)
 
-from .DetectedWidget import DetectedWidget
-from .DetectFreezing import DetectFreezing
+from DetectedWidget import DetectedWidget
+from DetectFreezing import DetectFreezing
 
 
 class Worker(QThread):
