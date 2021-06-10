@@ -4,15 +4,16 @@ import argparse
 import os
 import sys
 import time
+from typing import Any, Optional
 
-import MakeCSV
-from __init__ import __version__
+from __init__ import __version__  # type: ignore
+from MakeCSV import MakeCSV
 
 # __cmd__ = 'mf'
 __cmd__ = sys.argv[0]
 
 
-def check_file(x):
+def check_file(x: Any) -> str:
     x = os.path.join(os.getcwd(), x)
     if not os.path.exists(x):
         raise FileNotFoundError("{0} does not exist".format(x))
@@ -20,7 +21,7 @@ def check_file(x):
         return x
 
 
-def check_natural(v):
+def check_natural(v: Any) -> int:
     if int(v) < 0:
         raise argparse.ArgumentTypeError(
             "%s is an invalid natural number" % int(v))
@@ -40,7 +41,7 @@ class Formatter(
     pass
 
 
-def parser(test=None):
+def parser(test: Optional[list[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog=__cmd__,
         formatter_class=Formatter,
@@ -74,7 +75,7 @@ def parser(test=None):
         return parser.parse_args()
 
 
-def main():
+def main() -> None:
     start = time.time()
     args = parser()
 
@@ -84,9 +85,9 @@ def main():
 
     print('[Detecting...]',  end='', file=sys.stderr, flush=True)
 
-    m = MakeCSV.MakeCSV(avi=args.avi, delimiter=args.delimiter,
-                        header=args.header, out=args.out,
-                        threshold=args.threshold, window=args.window)
+    m = MakeCSV(avi=args.avi, delimiter=args.delimiter,
+                header=args.header, out=args.out,
+                threshold=args.threshold, window=args.window)
 
     m.make()
 

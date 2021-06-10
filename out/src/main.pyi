@@ -1,1 +1,3 @@
+from .MainWindow import MainWindow as MainWindow
+
 def main() -> None: ...

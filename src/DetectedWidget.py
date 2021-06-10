@@ -1,10 +1,16 @@
+from typing import Any, Optional
+
+import cv2
+import numpy as np
 import pyqtgraph as pg
 from PySide6.QtWidgets import QWidget
 
 
 class DetectedWidget(QWidget):
-    def __init__(self, video_path, data, raw_video,
-                 processed_video_frames, parent=None):
+    def __init__(self, video_path: str, data: list[int],
+                 raw_video: cv2.VideoCapture,
+                 processed_video_frames: list[np.ndarray],
+                 parent: Optional[Any] = None) -> None:
         super().__init__(parent)
         self.video_path = video_path
         self.data = data
@@ -15,8 +21,10 @@ class DetectedWidget(QWidget):
 
         self._make_window()
 
-    def _get_frames(self):
-        frames = []
+    def _get_frames(self) -> list[np.ndarray]:
+        frames: list[np.ndarray] = []
+        ret: bool
+        frame: np.ndarray
         ret, frame = self.raw_video.read()
         while ret:
             frames.append(frame)
@@ -25,7 +33,7 @@ class DetectedWidget(QWidget):
             print(len(frames))
             return frames
 
-    def _make_window(self):
+    def _make_window(self) -> None:
         win = pg.GraphicsLayoutWidget(show=True)
 
         # main graph
@@ -69,8 +77,8 @@ class DetectedWidget(QWidget):
 
         self.win = win
 
-    def convert_boolean_with_threshold(self):
+    def convert_boolean_with_threshold(self) -> list[int]:
         return [(0 if i > self.threshold else 1) for i in self.data]
 
-    def show(self):
+    def show(self) -> None:
         self.exec()

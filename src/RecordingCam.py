@@ -1,6 +1,7 @@
 from datetime import datetime
 
-import cv2
+import cv2  # type: ignore
+import numpy as np
 
 
 class CameraIsNotWorked(Exception):
@@ -8,7 +9,7 @@ class CameraIsNotWorked(Exception):
 
 
 class RecordingCam():
-    def __init__(self, device_id=0):
+    def __init__(self, device_id: int = 0) -> None:
         self.camera = cv2.VideoCapture(device_id)
         if not self.camera.isOpened():
             raise CameraIsNotWorked("deviceid: " + str(device_id))
@@ -20,7 +21,7 @@ class RecordingCam():
         print(self.video_size_info, self.__wait_sec)
 
     @staticmethod
-    def get_camid_list():
+    def get_camid_list() -> list[int]:
         """Get a list of ids of camera device."""
         from itertools import count
         ids = []
@@ -33,12 +34,13 @@ class RecordingCam():
             cap.release()
         return ids
 
-    def rec(self, f_base="output", f_ext: str = "avi",
-            frame_rate: int = 60, show_window=True) -> None:
+    def rec(self, f_base: str = "output", f_ext: str = "avi",
+            frame_rate: int = 60, show_window: bool = True) -> None:
         """Recording with camera"""
 
         fname = "{}-{}.{}".format(f_base, self.make_timestamp, f_ext)
-        out_file = cv2.VideoWriter(fname, -1, frame_rate, self.video_size_info)
+        out_file: cv2.VideoWriter = cv2.VideoWriter(
+            fname, -1, frame_rate, self.video_size_info)
         try:
             self._rec(out_file, show_window)
         except KeyboardInterrupt:
@@ -50,8 +52,10 @@ class RecordingCam():
         out_file.release()
         cv2.destroyAllWindows()
 
-    def _rec(self, out_file, show_window) -> None:
-        ret, frame = self.video.read()
+    def _rec(self, out_file: cv2.VideoWriter, show_window: bool) -> None:
+        ret: bool
+        frame: np.ndarray
+        ret, frame = self.camera.read()
         while ret:
             # binarize frame
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)

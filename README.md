@@ -14,3 +14,7 @@
 pip3 install -U pip
 pip3 install -r requirements.txt
 ```
+
+## Algorithm
+
+![algo](img/algorithm.png)

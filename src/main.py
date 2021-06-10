@@ -5,7 +5,8 @@ from PySide6.QtWidgets import QApplication
 from MainWindow import MainWindow
 
 
-def main():
+def main() -> None:
+    """Launch main window from MainWindow.py"""
     app = QApplication(sys.argv)
     window = MainWindow()
 

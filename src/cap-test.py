@@ -36,7 +36,7 @@ def check_camera_connection() -> None:
 
 
 def main() -> None:
-    # VideoCapture オブジェクトを取得します
+    """Record with VideoCapture"""
     capture: cv2.VideoCapture = cv2.VideoCapture(0)
 
     while True:

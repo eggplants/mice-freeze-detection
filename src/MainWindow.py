@@ -1,30 +1,33 @@
 import os
 import sys
+from typing import Optional
 
 from PySide6.QtCore import QSize, QThread, Signal, Slot
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (QFileDialog, QHBoxLayout, QMainWindow,
                                QPushButton, QVBoxLayout, QWidget)
 
-import DetectedWidget
-import DetectFreezing
+from .DetectedWidget import DetectedWidget
+from .DetectFreezing import DetectFreezing
 
 
 class Worker(QThread):
     rtn = Signal(tuple, name='rtn')
 
-    def __init__(self, video_path=None):
+    def __init__(self, video_path: Optional[str] = None) -> None:
         super(Worker, self).__init__()
         self.video_path = video_path
 
-    def run(self):
-        d = DetectFreezing.DetectFreezing(self.video_path)
-        data = d.detect(show_window=False)
-        self.rtn.emit((d, data))
+    def run(self) -> None:
+        d: DetectFreezing
+        d = DetectFreezing(self.video_path)
+        data: list[int] = d.detect(show_window=False)
+        res = (d, data)
+        self.rtn.emit(res)
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         QMainWindow.__init__(self)
         self.setWindowTitle("Mice Freezing Detection")
         self.resize(QSize(500, 400))
@@ -55,19 +58,19 @@ class MainWindow(QMainWindow):
         self._controls()
         self._layout()
 
-    def _controls(self):
+    def _controls(self) -> None:
         self.btn_detect = QPushButton('Detect', self)
         self.btn_detect.setEnabled(False)
         self.btn_detect.clicked.connect(self.detect_btn_clicked)
 
-    def detect_btn_clicked(self):
+    def detect_btn_clicked(self) -> None:
         print('processing')
         if not self.worker.isRunning():
             self.status.showMessage('Wait... - ' + self.video_path)
             self.btn_detect.setEnabled(False)
             self.worker.start()
 
-    def _layout(self):
+    def _layout(self) -> None:
 
         self.h_box = QHBoxLayout()
         self.h_box.addWidget(self.btn_detect)
@@ -83,7 +86,9 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.main_widget)
 
-    def open_file(self):
+    def open_file(self) -> None:
+        name: str
+        filter: str
         name, filter = QFileDialog.getOpenFileName(
             parent=self, caption='Open File',
             dir=os.getcwd(), filter="View Files (*.avi)")
@@ -97,18 +102,19 @@ class MainWindow(QMainWindow):
             self.video_path = name
             self.btn_detect.setEnabled(True)
 
-        self.worker = Worker(self.video_path)
+        self.worker: QThread = Worker(self.video_path)
         self.worker.rtn.connect(self.detect)
 
-    def detect(self, result):
+    def detect(self,
+               result: tuple[Df, list[int]]) -> None:
         self.status.showMessage('Processed - ' + self.video_path)
         self.btn_detect.setEnabled(True)
         d, data = result
         raw_video, video_frames = d.get_video()
-        sub = DetectedWidget.DetectedWidget(
+        sub = DetectedWidget(
             self.video_path, data, raw_video, video_frames, self)
         sub.show()
 
     @Slot()
-    def exit_app(self, checked):
+    def exit_app(self, checked) -> None:
         sys.exit()

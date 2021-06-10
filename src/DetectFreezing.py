@@ -1,7 +1,11 @@
 import os
+from typing import Any
 
 import cv2
 import numpy as np
+from cv2 import bgsegm_BackgroundSubtractorMOG as MOG
+
+from DetectedWidget import DetectedWidget
 
 
 class VideoFrameIsEmpty(Exception):
@@ -11,7 +15,8 @@ class VideoFrameIsEmpty(Exception):
 class DetectFreezing:
     """Detect moving and freezing behavior from an avi video file."""
 
-    def __init__(self, video_path):
+    def __init__(self, video_path: str) -> None:
+        """Initializer"""
         self.video_path = video_path
         self.video = self.__load_video(video_path)
         self.__wait_sec = int(1000 / self.video.get(cv2.CAP_PROP_FPS))
@@ -24,7 +29,7 @@ class DetectFreezing:
             """Get number of frame in video."""
             return video.get(cv2.CAP_PROP_FRAME_COUNT)
 
-        video = cv2.VideoCapture(path)
+        video: cv2.VideoCapture = cv2.VideoCapture(path)
         if get_frame_length(video) == 0:
             raise VideoFrameIsEmpty
         else:
@@ -36,7 +41,7 @@ class DetectFreezing:
         return video.get(cv2.CAP_PROP_FRAME_COUNT)
 
     @staticmethod
-    def __each_cons(arr: list, n: int) -> list:
+    def __each_cons(arr: list[Any], n: int) -> list[Any]:
         """Do List#each_cons(n) like Ruby."""
         return [arr[i:i+n] for i in range(len(arr)-n+1)]
 
@@ -46,7 +51,7 @@ class DetectFreezing:
         return cv2.bitwise_xor(im1, im2)
 
     @staticmethod
-    def __count_moved_dots(frames: np.ndarray) -> list:
+    def __count_moved_dots(frames: list[np.ndarray]) -> list[int]:
         """Count num of dots have moved since prev frame."""
         moved_dots = []
         for fr in frames:
@@ -59,15 +64,16 @@ class DetectFreezing:
         return moved_dots
 
     @staticmethod
-    def convert_boolean_with_threshold(data: np.ndarray, threshold: int = 10):
+    def convert_boolean_with_threshold(
+            data: list[int], threshold: int = 10) -> np.ndarray:
         return np.array([(0 if i > threshold else 1)
                          for i in data])
 
     def detect(self,
-               model=cv2.bgsegm.createBackgroundSubtractorMOG(),
-               show_window=True) -> np.ndarray:
+               model: MOG = cv2.bgsegm.createBackgroundSubtractorMOG(),
+               show_window: bool = True) -> list[int]:
         """Detect movement w/MOG - a background substract method by default."""
-        frames = []
+        frames: list[np.ndarray] = []
         # for reload video
         if show_window:
             xor_frames = self.__detect_with_window(frames, model)
@@ -79,7 +85,10 @@ class DetectFreezing:
 
         return dots
 
-    def __detect_with_window(self, frames, model):
+    def __detect_with_window(
+            self, frames: list[np.ndarray], model: MOG) -> list[np.ndarray]:
+        ret: bool
+        frame: np.ndarray
         ret, frame = self.video.read()
         while ret:
             mask = model.apply(frame)
@@ -102,7 +111,8 @@ class DetectFreezing:
         return xor_frames
 
     # TODO: 要高速化
-    def __detect(self, frames, model):
+    def __detect(
+            self, frames: list[np.ndarray], model: MOG) -> list[np.ndarray]:
         ret, frame = self.video.read()
         while ret:
             mask = model.apply(frame)
@@ -121,36 +131,42 @@ class DetectFreezing:
 
         return xor_frames
 
-    def get_video(self):
+    def get_video(self) -> tuple[cv2.VideoCapture, list[np.ndarray]]:
         self.video = self.__load_video(self.video_path)
-        if hasattr(self, 'processed_video'):
-            return (self.video, self.processed_video)
-        else:
-            return (self.video, None)
+        # if hasattr(self, 'processed_video'):
+        #     return (self.video, self.processed_video)
+        # else:
+        #     return (self.video, np.array([]))
+        return (self.video, self.processed_video)
+
+
+def main() -> None:
+    """Main process."""
+    video_path = os.path.join(
+        os.path.dirname(__file__), '..',
+        'videos', 'contextA.avi')
+
+    d = DetectFreezing(video_path)
+    s = input('show window?([n]/y): ')
+    print('detecting...')
+    if s.rstrip() == 'y':
+        data = d.detect()
+    else:
+        data = d.detect(show_window=False)
+
+    print('detected!')
+    # import pprint
+    # pprint.pprint(data, open('a.data', 'w'))
+    s = input('show graph?([y]/n): ')
+    if not s.rstrip() == 'n':
+        print('plotting...')
+        raw_video, processed_video_frames = d.get_video()
+        DetectedWidget(video_path, data, raw_video, processed_video_frames)
 
 
 if __name__ == '__main__':
     try:
-        video_path = os.path.join(os.path.dirname(
-            __file__), '..', 'videos', 'contextA.avi')
-        d = DetectFreezing(video_path)
-        s = input('show window?([n]/y): ')
-        print('detecting...')
-        if s.rstrip() == 'y':
-            data = d.detect()
-        else:
-            data = d.detect(show_window=False)
-
-        print('detected!')
-        # import pprint
-        # pprint.pprint(data, open('a.data', 'w'))
-        s = input('show graph?([y]/n): ')
-        if not s.rstrip() == 'n':
-            import DetectedWidget
-            print('plotting...')
-            DetectedWidget.DetectedWidget(
-                data, *d.get_video())
-
+        main()
     except KeyboardInterrupt:
         pass
 
