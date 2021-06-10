@@ -66,7 +66,7 @@ class DetectFreezing:
     @staticmethod
     def convert_boolean_with_threshold(
             data: list[int], threshold: int = 10) -> np.ndarray:
-        return np.array([(0 if i > threshold else 1)
+        return np.array([(1 if i > threshold else 0)
                          for i in data])
 
     def detect(self,
