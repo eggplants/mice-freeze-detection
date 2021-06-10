@@ -1,5 +1,4 @@
 import argparse
-from . import MakeCSV as MakeCSV
 from typing import Any, Optional
 
 __cmd__: Any

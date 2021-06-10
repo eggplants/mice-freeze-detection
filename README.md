@@ -1,5 +1,7 @@
 # mice-freeze-detection
 
+[![Build](https://github.com/eggplants/mice-freeze-detection/actions/workflows/build.yml/badge.svg)](https://github.com/eggplants/mice-freeze-detection/actions/workflows/build.yml)
+
 - Detection of freezing mice
 
 ## Reference

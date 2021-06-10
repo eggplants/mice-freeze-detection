@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
         self.worker.rtn.connect(self.detect)
 
     def detect(self,
-               result: tuple[Df, list[int]]) -> None:
+               result: tuple[DetectFreezing, list[int]]) -> None:
         self.status.showMessage('Processed - ' + self.video_path)
         self.btn_detect.setEnabled(True)
         d, data = result

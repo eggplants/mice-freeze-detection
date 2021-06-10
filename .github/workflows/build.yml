@@ -1,11 +1,9 @@
 name: Build
 on:
+  # [workflow_dispatch]
   push:
     tags:
       - "v*"
-
-env:
-  SOFT_NAME: mice-freeze-detector
 
 jobs:
   windows-build:
@@ -23,14 +21,17 @@ jobs:
           python -m pip install -U pip
           python -m pip install -r requirements.txt
 
-      - name: build
-        run: pyinstaller -F src/main.py -i img/icon.ico
+      - name: Build
+        run: pyinstaller -F src/main.py -i img/icon.ico -n mice_freeze_detector
 
-      - name: upload
+      - name: Print dist
+        run: ls dist
+
+      - name: Upload
         uses: actions/upload-artifact@v1
         with:
-          name: ${SOFT_NAME}-windows
-          path: dist/${SOFT_NAME}.exe
+          name: mice_freeze_detector-windows
+          path: dist/mice_freeze_detector.exe
 
   macOS-build:
     runs-on: macOS-latest
@@ -47,14 +48,17 @@ jobs:
           python -m pip install -U pip PyInstaller
           python -m pip install -r requirements.txt
 
-      - name: build
-        run: pyinstaller -F src/main.py -i img/icon.ico
+      - name: Build
+        run: pyinstaller -F src/main.py -i img/icon.ico -n mice_freeze_detector
 
-      - name: upload
+      - name: Print dist
+        run: ls dist
+
+      - name: Upload
         uses: actions/upload-artifact@v1
         with:
-          name: ${SOFT_NAME}-macos
-          path: dist/${SOFT_NAME}
+          name: mice_freeze_detector-macos
+          path: dist/mice_freeze_detector
 
   ubuntu-build:
     runs-on: ubuntu-latest
@@ -72,14 +76,17 @@ jobs:
           python -m pip install -U pip PyInstaller
           python -m pip install -r requirements.txt
 
-      - name: build
-        run: pyinstaller -F src/main.py -i img/icon.ico
+      - name: Build
+        run: pyinstaller -F src/main.py -i img/icon.ico -n mice_freeze_detector
 
-      - name: upload
+      - name: Print dist
+        run: ls dist
+
+      - name: Upload
         uses: actions/upload-artifact@v1
         with:
-          name: ${SOFT_NAME}-linux
-          path: dist/${SOFT_NAME}
+          name: mice_freeze_detector-linux
+          path: dist/mice_freeze_detector
 
   release:
     needs: [ubuntu-build, macOS-build, windows-build]
@@ -89,17 +96,17 @@ jobs:
       - name: Download Linux
         uses: actions/download-artifact@v1
         with:
-          name: ${SOFT_NAME}-linux
+          name: mice_freeze_detector-linux
 
       - name: Download Mac
         uses: actions/download-artifact@v1
         with:
-          name: ${SOFT_NAME}-macos
+          name: mice_freeze_detector-macos
 
       - name: Download Windows
         uses: actions/download-artifact@v1
         with:
-          name: ${SOFT_NAME}-windows
+          name: mice_freeze_detector-windows
 
       - name: Create Release
         id: create_release
@@ -114,9 +121,9 @@ jobs:
 
       - name: Zip
         run: |
-          tar -C ${SOFT_NAME}-macos -pczvf ${SOFT_NAME}-macos.tar.gz ${SOFT_NAME}
-          tar -C ${SOFT_NAME}-linux -pczvf ${SOFT_NAME}-linux.tar.gz ${SOFT_NAME}
-          zip --junk-paths ${SOFT_NAME}-windows ./tracking_GUI-windows/${SOFT_NAME}.exe
+          tar -C mice_freeze_detector-macos -pczvf mice_freeze_detector-macos.tar.gz mice_freeze_detector
+          tar -C mice_freeze_detector-linux -pczvf mice_freeze_detector-linux.tar.gz mice_freeze_detector
+          zip --junk-paths mice_freeze_detector-windows ./tracking_GUI-windows/mice_freeze_detector.exe
 
       - name: Set env
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> "$GITHUB_ENV"
@@ -127,8 +134,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${SOFT_NAME}-macos.tar.gz
-          asset_name: ${SOFT_NAME}-macos_${{ env.RELEASE_VERSION }}.tar.gz
+          asset_path: ./mice_freeze_detector-macos.tar.gz
+          asset_name: mice_freeze_detector-macos_${{ env.RELEASE_VERSION }}.tar.gz
           asset_content_type: application/gzip
 
       - name: Append linux Binary
@@ -137,8 +144,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${SOFT_NAME}-linux.tar.gz
-          asset_name: ${SOFT_NAME}-linux_${{ env.RELEASE_VERSION }}.tar.gz
+          asset_path: ./mice_freeze_detector-linux.tar.gz
+          asset_name: mice_freeze_detector-linux_${{ env.RELEASE_VERSION }}.tar.gz
           asset_content_type: application/gzip
 
       - name: Append win Binary
@@ -147,6 +154,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${SOFT_NAME}-windows.zip
-          asset_name: ${SOFT_NAME}-windows_${{ env.RELEASE_VERSION }}.zip
+          asset_path: ./mice_freeze_detector-windows.zip
+          asset_name: mice_freeze_detector-windows_${{ env.RELEASE_VERSION }}.zip
           asset_content_type: application/zip

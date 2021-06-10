@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from . import DetectedWidget as DetectedWidget
 from cv2 import bgsegm_BackgroundSubtractorMOG as MOG
 from typing import Any
 

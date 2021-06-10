@@ -1,4 +1,3 @@
-from . import DetectFreezing as DetectFreezing
 from typing import Any, Union
 
 class MakeCSV:
