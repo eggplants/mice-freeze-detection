@@ -1,3 +1,5 @@
+"""Detect moving and freezing behavior from an avi video file.
+"""
 import os
 from typing import Any
 
@@ -9,14 +11,25 @@ from DetectedWidget import DetectedWidget
 
 
 class VideoFrameIsEmpty(Exception):
+    """Error raises when video frame is empty.
+    """
     pass
 
 
 class DetectFreezing:
-    """Detect moving and freezing behavior from an avi video file."""
+    """Detect moving and freezing behavior from an avi video file.
+
+    Raises:
+        VideoFrameIsEmpty: Error raises when video frame is empty
+    """
 
     def __init__(self, video_path: str) -> None:
-        """Initializer"""
+        """Constructor.
+
+        Args:
+            video_path (str): video path processes
+        """
+
         self.video_path = video_path
         self.video = self.__load_video(video_path)
         self.__wait_sec = int(1000 / self.video.get(cv2.CAP_PROP_FPS))
@@ -24,9 +37,26 @@ class DetectFreezing:
 
     @staticmethod
     def __load_video(path: str) -> cv2.VideoCapture:
-        """Load video to OpenCV."""
+        """Load video to OpenCV.
+
+        Args:
+            path (str): video path
+
+        Raises:
+            VideoFrameIsEmpty: video path is invalid
+
+        Returns:
+            cv2.VideoCapture: video stream object
+        """
         def get_frame_length(video: cv2.VideoCapture) -> float:
-            """Get number of frame in video."""
+            """Get number of frame in video.
+
+            Args:
+                video (cv2.VideoCapture): video stream
+
+            Returns:
+                float: number of video frame
+            """
             return video.get(cv2.CAP_PROP_FRAME_COUNT)
 
         video: cv2.VideoCapture = cv2.VideoCapture(path)
@@ -37,22 +67,52 @@ class DetectFreezing:
 
     @staticmethod
     def __get_frame_length(video: cv2.VideoCapture) -> float:
-        """Get video size as number of frames."""
+        """Get video size as number of frames.
+
+        Args:
+            video (cv2.VideoCapture): [description]
+
+        Returns:
+            float: [description]
+        """
         return video.get(cv2.CAP_PROP_FRAME_COUNT)
 
     @staticmethod
     def __each_cons(arr: list[Any], n: int) -> list[Any]:
-        """Do List#each_cons(n) like Ruby."""
+        """Do List  # each_cons(n) like Ruby.
+
+        Args:
+            arr (list[Any]): [description]
+            n (int): [description]
+
+        Returns:
+            list[Any]: [description]
+        """
         return [arr[i:i+n] for i in range(len(arr)-n+1)]
 
     @staticmethod
     def __xor_image(im1: np.ndarray, im2: np.ndarray) -> np.ndarray:
-        "Xor 2 images."
+        """Xor 2 images
+
+        Args:
+            im1 (np.ndarray): [description]
+            im2 (np.ndarray): [description]
+
+        Returns:
+            np.ndarray: [description]
+        """
         return cv2.bitwise_xor(im1, im2)
 
     @staticmethod
     def __count_moved_dots(frames: list[np.ndarray]) -> list[int]:
-        """Count num of dots have moved since prev frame."""
+        """Count num of dots have moved since prev frame.
+
+        Args:
+            frames (list[np.ndarray]): [description]
+
+        Returns:
+            list[int]: [description]
+        """        """"""
         moved_dots = []
         for fr in frames:
             cnt = 0
@@ -66,13 +126,30 @@ class DetectFreezing:
     @staticmethod
     def convert_boolean_with_threshold(
             data: list[int], threshold: int = 10) -> np.ndarray:
-        return np.array([(1 if i > threshold else 0)
+        """
+
+        Args:
+            data (list[int]): [description]
+            threshold (int, optional): [description]. Defaults to 10.
+
+        Returns:
+            np.ndarray: [description]
+        """
+        return np.array([(0 if i > threshold else 1)
                          for i in data])
 
     def detect(self,
                model: MOG = cv2.bgsegm.createBackgroundSubtractorMOG(),
                show_window: bool = True) -> list[int]:
-        """Detect movement w/MOG - a background substract method by default."""
+        """Detect movement w/MOG - a background substract method by default.
+
+        Args:
+            model (MOG, optional): [description]. Defaults to MOG.
+            show_window (bool, optional): [description]. Defaults to True.
+
+        Returns:
+            list[int]: [description]
+        """
         frames: list[np.ndarray] = []
         # for reload video
         if show_window:
@@ -87,6 +164,15 @@ class DetectFreezing:
 
     def __detect_with_window(
             self, frames: list[np.ndarray], model: MOG) -> list[np.ndarray]:
+        """[summary]
+
+        Args:
+            frames (list[np.ndarray]): [description]
+            model (MOG): [description]
+
+        Returns:
+            list[np.ndarray]: [description]
+        """
         ret: bool
         frame: np.ndarray
         ret, frame = self.video.read()
@@ -113,6 +199,15 @@ class DetectFreezing:
     # TODO: 要高速化
     def __detect(
             self, frames: list[np.ndarray], model: MOG) -> list[np.ndarray]:
+        """[summary]
+
+        Args:
+            frames (list[np.ndarray]): [description]
+            model (MOG): [description]
+
+        Returns:
+            list[np.ndarray]: [description]
+        """
         ret, frame = self.video.read()
         while ret:
             mask = model.apply(frame)
@@ -132,6 +227,11 @@ class DetectFreezing:
         return xor_frames
 
     def get_video(self) -> tuple[cv2.VideoCapture, list[np.ndarray]]:
+        """[summary]
+
+        Returns:
+            tuple[cv2.VideoCapture, list[np.ndarray]]: [description]
+        """
         self.video = self.__load_video(self.video_path)
         # if hasattr(self, 'processed_video'):
         #     return (self.video, self.processed_video)

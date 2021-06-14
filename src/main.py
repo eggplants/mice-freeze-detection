@@ -6,7 +6,8 @@ from MainWindow import MainWindow
 
 
 def main() -> None:
-    """Launch main window from MainWindow.py"""
+    """Launch main window from MainWindow.py.
+    """
     app = QApplication(sys.argv)
     window = MainWindow()
 

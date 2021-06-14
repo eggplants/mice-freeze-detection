@@ -5,11 +5,24 @@ import numpy as np
 
 
 class CameraIsNotWorked(Exception):
+    """[summary]
+    """
     pass
 
 
 class RecordingCam():
+    """[summary]
+    """
+
     def __init__(self, device_id: int = 0) -> None:
+        """[summary]
+
+        Args:
+            device_id (int, optional): [description]. Defaults to 0.
+
+        Raises:
+            CameraIsNotWorked: [description]
+        """
         self.camera = cv2.VideoCapture(device_id)
         if not self.camera.isOpened():
             raise CameraIsNotWorked("deviceid: " + str(device_id))
@@ -22,7 +35,11 @@ class RecordingCam():
 
     @staticmethod
     def get_camid_list() -> list[int]:
-        """Get a list of ids of camera device."""
+        """Get a list of ids of camera device.
+
+        Returns:
+            list[int]: [description]
+        """
         from itertools import count
         ids = []
         for i in count():
@@ -36,8 +53,17 @@ class RecordingCam():
 
     def rec(self, f_base: str = "output", f_ext: str = "avi",
             frame_rate: int = 60, show_window: bool = True) -> None:
-        """Recording with camera"""
+        """Recording with camera.
 
+        Args:
+            f_base (str, optional): [description]. Defaults to "output".
+            f_ext (str, optional): [description]. Defaults to "avi".
+            frame_rate (int, optional): [description]. Defaults to 60.
+            show_window (bool, optional): [description]. Defaults to True.
+
+        Raises:
+            e: [description]
+        """
         fname = "{}-{}.{}".format(f_base, self.make_timestamp, f_ext)
         out_file: cv2.VideoWriter = cv2.VideoWriter(
             fname, -1, frame_rate, self.video_size_info)
@@ -53,6 +79,12 @@ class RecordingCam():
         cv2.destroyAllWindows()
 
     def _rec(self, out_file: cv2.VideoWriter, show_window: bool) -> None:
+        """[summary]
+
+        Args:
+            out_file (cv2.VideoWriter): [description]
+            show_window (bool): [description]
+        """
         ret: bool
         frame: np.ndarray
         ret, frame = self.camera.read()
@@ -66,10 +98,23 @@ class RecordingCam():
 
     @staticmethod
     def make_timestamp() -> str:
+        """[summary]
+
+        Returns:
+            str: [description]
+        """
         return datetime.now().strftime('%Y-%m-%d_%H-%M-%S_%f')
 
     @staticmethod
     def check_camera(video: cv2.VideoCapture) -> bool:
+        """[summary]
+
+        Args:
+            video (cv2.VideoCapture): [description]
+
+        Returns:
+            bool: [description]
+        """
         return video.isOpened()
 
 
