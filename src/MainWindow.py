@@ -2,14 +2,13 @@ import os
 import sys
 from typing import Optional
 
-import pyqtgraph as pg
-from PySide6.QtCore import QSize, Qt, QThread, Signal, Slot
+from PySide6.QtCore import QSize, Qt, QThread, Signal
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (QFileDialog, QHBoxLayout, QLabel, QMainWindow,
                                QPushButton, QVBoxLayout, QWidget)
 
-from DetectedWidget import DetectedWidget
-from DetectFreezing import DetectFreezing
+from DetectedWidget import DetectedWidget  # type: ignore
+from DetectFreezing import DetectFreezing  # type: ignore
 
 
 class Worker(QThread):
@@ -168,7 +167,6 @@ class MainWindow(QMainWindow):
             self.video_path, data, raw_video, video_frames, self)
         sub.show()
 
-    @Slot()
     def exit_app(self, _: bool) -> None:
         """Close app.
 

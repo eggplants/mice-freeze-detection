@@ -3,6 +3,7 @@
 
 import datetime
 import os
+import sys
 from typing import Any, Optional
 
 import cv2
@@ -56,7 +57,6 @@ class DetectedWidget(QWidget):
             frames.append(frame)
             ret, frame = self.raw_video.read()
         else:
-            print(len(frames))
             self.frame_len = len(frames)
             return frames
 
@@ -138,8 +138,8 @@ class DetectedWidget(QWidget):
             'result-{}-%Y%m%d-%H-%M-%S.csv'.format(os.path.basename(self.video_path)))
         output = os.path.join(dir_path, fname)
 
-        m = MakeCSV(self.video_path, header=True,
-                    out=output, threshold=self.threshold)
+        m = MakeCSV(self.video_path, output,
+                    header=True, threshold=self.threshold)
 
         m.make(self.data, self.convert_boolean_with_threshold())
 
@@ -157,5 +157,6 @@ class DetectedWidget(QWidget):
         try:
             self.exec()
         except AttributeError as e:
-            print(type(e), 'was happened in DetectedWidget#show')
+            print('[note]:' + str(type(e)) +
+                  ' was happened in DetectedWidget#show', file=sys.stderr)
             pass

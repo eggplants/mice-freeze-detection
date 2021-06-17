@@ -8,8 +8,8 @@ import time
 from typing import Any, Optional
 
 from __init__ import __version__  # type: ignore
-from DetectFreezing import DetectFreezing
-from MakeCSV import MakeCSV
+from DetectFreezing import DetectFreezing  # type: ignore
+from MakeCSV import MakeCSV  # type: ignore
 
 # __cmd__ = 'mf'
 __cmd__ = sys.argv[0]
@@ -116,15 +116,14 @@ def main() -> None:
         print('[version: {}]'.format(__version__), file=sys.stderr)
         print('[args: {}]'.format(vars(args)), file=sys.stderr)
 
-    print('[Detecting...]',  end='', file=sys.stderr, flush=True)
+    print('[Detecting...]', file=sys.stderr, flush=True)
 
     d = DetectFreezing(args.avi)
     res: list[int] = d.detect(show_window=args.window)
     b = d.convert_boolean_with_threshold(res, args.threshold)
 
-    m = MakeCSV(avi=args.avi, delimiter=args.delimiter,
-                header=args.header, out=args.out,
-                threshold=args.threshold)
+    m = MakeCSV(args.avi, args.out, delimiter=args.delimiter,
+                header=args.header, threshold=args.threshold)
 
     m.make(res, b)
 

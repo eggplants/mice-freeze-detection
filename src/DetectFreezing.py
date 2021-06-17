@@ -1,6 +1,7 @@
 """Detect moving and freezing behavior from an avi video file.
 """
 import os
+import sys
 from typing import Any
 
 import cv2
@@ -156,7 +157,7 @@ class DetectFreezing:
         else:
             xor_frames = self.__detect(frames, model)
 
-        print('[counting moved dots...]')
+        print('[counting moved dots...]', file=sys.stderr)
 
         self.processed_video = xor_frames
         dots = self.__count_moved_dots(xor_frames)
@@ -210,7 +211,7 @@ class DetectFreezing:
             list[np.ndarray]: [description]
         """
         length = int(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
-        print('[length]:{} frames'.format(length))
+        print('[length]:{} frames'.format(length), file=sys.stderr)
         if length == 0:
             return []
 
@@ -218,13 +219,13 @@ class DetectFreezing:
         ret, frame = self.video.read()
         while ret:
             ind += 1
-            print('[pre]:{}/{}'.format(ind, length), end='\r')
+            print('[pre]:{}/{}'.format(ind, length), end='\r', file=sys.stderr)
             mask = model.apply(frame)
             frame[mask == 0] = 0
             frames.append(frame)
             ret, frame = self.video.read()
         else:
-            print('\033[1K[pre]:completed!')
+            print('\033[1K[pre]:completed!', file=sys.stderr)
 
         cv2.destroyAllWindows()
 
@@ -234,11 +235,11 @@ class DetectFreezing:
         self.video.release()
         for x, y in self.__each_cons(frames, 2):
             ind += 1
-            print('[xor]:{}/{}'.format(ind, length), end='\r')
+            print('[xor]:{}/{}'.format(ind, length), end='\r', file=sys.stderr)
             f = self.__xor_image(x, y)
             xor_frames.append(f)
         else:
-            print('[xor]:completed!')
+            print('[xor]:completed!', file=sys.stderr)
 
         return xor_frames
 
@@ -264,18 +265,17 @@ def main() -> None:
 
     d = DetectFreezing(video_path)
     s = input('show window?([n]/y): ')
-    print('detecting...')
+    print('[detecting...]', file=sys.stderr)
     if s.rstrip() == 'y':
         data = d.detect()
     else:
         data = d.detect(show_window=False)
 
-    print('detected!')
-    # import pprint
-    # pprint.pprint(data, open('a.data', 'w'))
+    print('[detected!]', file=sys.stderr)
+
     s = input('show graph?([y]/n): ')
     if not s.rstrip() == 'n':
-        print('plotting...')
+        print('[plotting...]', file=sys.stderr)
         raw_video, processed_video_frames = d.get_video()
         DetectedWidget(video_path, data, raw_video, processed_video_frames)
 
