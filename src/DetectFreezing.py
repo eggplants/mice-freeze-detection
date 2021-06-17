@@ -112,14 +112,13 @@ class DetectFreezing:
 
         Returns:
             list[int]: [description]
-        """        """"""
+        """
         moved_dots = []
+        s = frames[0].shape
         for fr in frames:
-            cnt = 0
-            for dots in fr:
-                cnt += sum(1 if x != [0, 0, 0] else 0 for x in dots.tolist())
+            fr = fr.reshape(s[0]*s[1], s[2])
 
-            moved_dots.append(cnt)
+            moved_dots.append(int(np.count_nonzero(fr != [0, 0, 0])/3))
 
         return moved_dots
 
@@ -156,6 +155,8 @@ class DetectFreezing:
             xor_frames = self.__detect_with_window(frames, model)
         else:
             xor_frames = self.__detect(frames, model)
+
+        print('[counting moved dots...]')
 
         self.processed_video = xor_frames
         dots = self.__count_moved_dots(xor_frames)
@@ -208,21 +209,36 @@ class DetectFreezing:
         Returns:
             list[np.ndarray]: [description]
         """
+        length = int(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
+        print('[length]:{} frames'.format(length))
+        if length == 0:
+            return []
+
+        ind = 0
         ret, frame = self.video.read()
         while ret:
+            ind += 1
+            print('[pre]:{}/{}'.format(ind, length), end='\r')
             mask = model.apply(frame)
             frame[mask == 0] = 0
             frames.append(frame)
             ret, frame = self.video.read()
+        else:
+            print('\033[1K[pre]:completed!')
 
         cv2.destroyAllWindows()
 
         # measure moving again
         xor_frames = []
+        ind = 1
         self.video.release()
         for x, y in self.__each_cons(frames, 2):
+            ind += 1
+            print('[xor]:{}/{}'.format(ind, length), end='\r')
             f = self.__xor_image(x, y)
             xor_frames.append(f)
+        else:
+            print('[xor]:completed!')
 
         return xor_frames
 

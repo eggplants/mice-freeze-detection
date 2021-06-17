@@ -79,8 +79,12 @@ class MainWindow(QMainWindow):
         self._controls()
         self._layout()
 
-        self.setFixedHeight(200)
-        self.setFixedWidth(500)
+        # set window size(h,w)
+        self.setFixedHeight(100)
+        self.setFixedWidth(200)
+
+        # always visible on top
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
     def _controls(self) -> None:
         """Define control UI.
@@ -95,7 +99,7 @@ class MainWindow(QMainWindow):
     def __detect_btn_clicked(self) -> None:
         """Executes to process when button clicked
         """
-        print('processing')
+        print('[processing...]')
         if not self.worker.isRunning():
             self.status.showMessage('Wait... - ' + self.video_path)
             self.btn_detect.setEnabled(False)
@@ -135,7 +139,7 @@ class MainWindow(QMainWindow):
         name, filter = QFileDialog.getOpenFileName(
             parent=self, caption='Open File',
             dir=os.getcwd(), filter="View Files (*.avi)")
-        print('video: ' + name)
+        print('[video]:' + name)
         if name == '':
             self.status.showMessage('Open video to be processed')
             self.video_path = name
