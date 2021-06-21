@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from cv2 import bgsegm_BackgroundSubtractorMOG as MOG
 
 # memo:
 # // 白黒輪郭画像の内でランダムサンプリング
@@ -24,7 +25,7 @@ length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
 frames = []
 res, frame = cap.read()
-model = cv2.bgsegm.createBackgroundSubtractorMOG()
+model: MOG = cv2.bgsegm.createBackgroundSubtractorMOG()
 ind = 2
 while res:
     ind += 1

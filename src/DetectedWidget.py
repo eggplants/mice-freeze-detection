@@ -4,7 +4,7 @@
 import datetime
 import os
 import sys
-from typing import Any, Optional
+from typing import Any, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -13,7 +13,7 @@ from PySide6.QtCore import QSize
 from PySide6.QtWidgets import (QFileDialog, QGraphicsProxyWidget, QPushButton,
                                QWidget)
 
-from MakeCSV import MakeCSV
+from MakeCSV import MakeCSV  # type: ignore
 
 
 class DetectedWidget(QWidget):
@@ -66,7 +66,7 @@ class DetectedWidget(QWidget):
         win = pg.GraphicsLayoutWidget(show=True)
 
         win.setWindowTitle('Mice Freezing Detection - processing results')
-        win.resize(QSize(700, 500))
+        win.resize(QSize(700, 700))  # width, height
 
         # main graph
         freeze_graph = win.addPlot(row=0, col=0, colspan=2)
@@ -76,11 +76,15 @@ class DetectedWidget(QWidget):
         freeze_graph.setLabel(axis='bottom', text='Video Frame index')
         freeze_graph.plot(self.data)
         freeze_graph.setLimits(xMin=0, yMin=0, xMax=self.frame_len)
+        v_bar1, h_bar1 = self.__make_bar(1000)
+        freeze_graph.addItem(v_bar1)
+        freeze_graph.addItem(h_bar1)
 
         win.nextRow()
 
         # bool graph
         bool_graph = win.addPlot(row=1, col=0, colspan=2)
+        bool_graph.setMouseEnabled(y=False)
         bool_graph.setRange(yRange=(0, 1), padding=0)
         bool_graph.setTitle(
             '[Freezing Boolean](1/0=T/F, th.={})'.format(self.threshold))
@@ -93,6 +97,8 @@ class DetectedWidget(QWidget):
         bool_graph.addItem(bar)
         # bool_graph.hideAxis('left')
         bool_graph.setLimits(xMin=0, yMin=0, xMax=self.frame_len, yMax=1)
+        v_bar2, _ = self.__make_bar()
+        bool_graph.addItem(v_bar2)
 
         win.nextRow()
 
@@ -128,6 +134,15 @@ class DetectedWidget(QWidget):
         p3.addItem(proxy, row=1, col=1)
 
         self.win = win
+
+    def __make_bar(self, h_max: Optional[int] = None) -> Tuple[pg.InfiniteLine, pg.InfiniteLine]:
+        v_bar = pg.InfiniteLine(angle=90, movable=True,
+                                bounds=[0, self.frame_len])
+        h_bar = pg.InfiniteLine(angle=0, movable=True,
+                                bounds=[0, h_max])
+        v_bar.setZValue(2)
+        h_bar.setZValue(2)
+        return (v_bar, h_bar)
 
     def __detect_btn_clicked(self):
         dir_path = QFileDialog.getExistingDirectory(

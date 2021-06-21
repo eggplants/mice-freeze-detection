@@ -2,7 +2,7 @@ import os
 import sys
 from typing import Optional
 
-from PySide6.QtCore import QSize, Qt, QThread, Signal
+from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (QFileDialog, QHBoxLayout, QLabel, QMainWindow,
                                QPushButton, QVBoxLayout, QWidget)
@@ -35,7 +35,7 @@ class Worker(QThread):
         d = DetectFreezing(self.video_path)
         data: list[int] = d.detect(show_window=False)
         res = (d, data)
-        self.rtn.emit(res)
+        self.rtn.emit(res)  # type: ignore
 
 
 class MainWindow(QMainWindow):
@@ -50,7 +50,7 @@ class MainWindow(QMainWindow):
         """
         QMainWindow.__init__(self)
         self.setWindowTitle("Mice Freezing Detection")
-        self.resize(QSize(500, 400))
+        # self.resize(QSize(500, 400))
 
         # Menu
         self.menu = self.menuBar()
@@ -79,8 +79,8 @@ class MainWindow(QMainWindow):
         self._layout()
 
         # set window size(h,w)
-        self.setFixedHeight(100)
-        self.setFixedWidth(200)
+        self.setFixedHeight(200)
+        self.setFixedWidth(400)
 
         # always visible on top
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
@@ -149,7 +149,7 @@ class MainWindow(QMainWindow):
             self.btn_detect.setEnabled(True)
 
         self.worker: QThread = Worker(self.video_path)
-        self.worker.rtn.connect(self.__detected)
+        self.worker.rtn.connect(self.__detected)  # type: ignore
 
     def __detected(self,
                    result: tuple[DetectFreezing, list[int]]) -> None:
