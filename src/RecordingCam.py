@@ -5,13 +5,13 @@ import numpy as np
 
 
 class CameraIsNotWorked(Exception):
-    """[summary]
+    """Error for handing not to work a camera.
     """
     pass
 
 
 class RecordingCam():
-    """[summary]
+    """Recording camera.
     """
 
     def __init__(self, device_id: int = 0) -> None:
@@ -38,7 +38,7 @@ class RecordingCam():
         """Get a list of ids of camera device.
 
         Returns:
-            list[int]: [description]
+            list[int]: list of cam ids.
         """
         from itertools import count
         ids = []
@@ -56,13 +56,13 @@ class RecordingCam():
         """Recording with camera.
 
         Args:
-            f_base (str, optional): [description]. Defaults to "output".
-            f_ext (str, optional): [description]. Defaults to "avi".
-            frame_rate (int, optional): [description]. Defaults to 60.
-            show_window (bool, optional): [description]. Defaults to True.
+            f_base (str, optional): file base dir. Defaults to "output".
+            f_ext (str, optional): file extension. Defaults to "avi".
+            frame_rate (int, optional): recording frame rate. Defaults to 60.
+            show_window (bool, optional): flag if window shows or not. Defaults to True.
 
         Raises:
-            e: [description]
+            Exception: unexpected error while recoring.
         """
         fname = "{}-{}.{}".format(f_base, self.make_timestamp, f_ext)
         out_file: cv2.VideoWriter = cv2.VideoWriter(
@@ -74,16 +74,16 @@ class RecordingCam():
         except Exception as e:
             raise e
 
-        self.camera = self.camera.set(cv2.cv.CV_CAP_PROP_POS_FRAMES, 0)
+        self.camera = self.camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
         out_file.release()
         cv2.destroyAllWindows()
 
     def _rec(self, out_file: cv2.VideoWriter, show_window: bool) -> None:
-        """[summary]
+        """Recoring helper.
 
         Args:
-            out_file (cv2.VideoWriter): [description]
-            show_window (bool): [description]
+            out_file (cv2.VideoWriter): output file object.
+            show_window (bool):  flag if window shows or not.
         """
         ret: bool
         frame: np.ndarray
@@ -98,22 +98,22 @@ class RecordingCam():
 
     @staticmethod
     def make_timestamp() -> str:
-        """[summary]
+        """Make a string of timestamp.
 
         Returns:
-            str: [description]
+            str: timestamp ('%Y-%m-%d_%H-%M-%S_%f').
         """
         return datetime.now().strftime('%Y-%m-%d_%H-%M-%S_%f')
 
     @staticmethod
     def check_camera(video: cv2.VideoCapture) -> bool:
-        """[summary]
+        """Check if a camera is ok.
 
         Args:
-            video (cv2.VideoCapture): [description]
+            video (cv2.VideoCapture): video object.
 
         Returns:
-            bool: [description]
+            bool: if camera is ok or not.
         """
         return video.isOpened()
 

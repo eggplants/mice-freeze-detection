@@ -12,18 +12,15 @@ from DetectFreezing import DetectFreezing  # type: ignore
 
 
 class Worker(QThread):
-    """[summary]
-
-    Args:
-        QThread ([type]): [description]
+    """Worker to process video and return results with threading.
     """
     rtn = Signal(tuple, name='rtn')
 
     def __init__(self, video_path: Optional[str] = None) -> None:
-        """[summary]
+        """Init.
 
         Args:
-            video_path (Optional[str], optional): [description]. Defaults to None.
+            video_path (Optional[str], optional): video path. Defaults to None.
         """
         super(Worker, self).__init__()
         self.video_path = video_path
@@ -39,14 +36,11 @@ class Worker(QThread):
 
 
 class MainWindow(QMainWindow):
-    """[summary]
-
-    Args:
-        QMainWindow ([type]): [description]
+    """Main window.
     """
 
     def __init__(self) -> None:
-        """[summary]
+        """Init.
         """
         QMainWindow.__init__(self)
         self.setWindowTitle("Mice Freezing Detection")
@@ -106,7 +100,7 @@ class MainWindow(QMainWindow):
             self.worker.start()
 
     def _layout(self) -> None:
-        """Define layout UI
+        """Define layout UI.
         """
         self.h_box1 = QHBoxLayout()
         label1 = QLabel(self)
@@ -153,10 +147,10 @@ class MainWindow(QMainWindow):
 
     def __detected(self,
                    result: tuple[DetectFreezing, list[int]]) -> None:
-        """Open a window which results are plotted
+        """Open a window which results are plotted.
 
         Args:
-            result (tuple[DetectFreezing, list[int]]): [description]
+            result (tuple[DetectFreezing, list[int]]): return values of Worker.run()
         """
         self.status.showMessage('Processed - ' + self.video_path)
         self.btn_detect.setEnabled(True)
@@ -171,6 +165,6 @@ class MainWindow(QMainWindow):
         """Close app.
 
         Args:
-            _ (bool): placeholder
+            _ (bool): placeholder.
         """
         sys.exit()

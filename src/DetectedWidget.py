@@ -137,6 +137,14 @@ class DetectedWidget(QWidget):
         self.win = win
 
     def __make_bar(self, h_max: Optional[int] = None) -> Tuple[pg.InfiniteLine, pg.InfiniteLine]:
+        """Make vertical/horizontal bar on graph.
+
+        Args:
+            h_max (Optional[int], optional): maximum to move horizontal bar. Defaults to None.
+
+        Returns:
+            Tuple[pg.InfiniteLine, pg.InfiniteLine]: objects of vertical and horizontal bars.
+        """
         v_bar = pg.InfiniteLine(angle=90, movable=True,
                                 bounds=[0, self.frame_len])
         h_bar = pg.InfiniteLine(angle=0, movable=True,
@@ -145,7 +153,9 @@ class DetectedWidget(QWidget):
         h_bar.setZValue(2)
         return (v_bar, h_bar)
 
-    def __detect_btn_clicked(self):
+    def __detect_btn_clicked(self) -> None:
+        """Detect if button is clicked.
+        """
         dir_path = QFileDialog.getExistingDirectory(
             self, 'Select Directory', os.getcwd())
         now = datetime.datetime.now(datetime.timezone(
