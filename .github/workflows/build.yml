@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "v*"
+env:
+  PYTHON_VERSION: 3.9
 
 jobs:
   windows-build:
@@ -12,9 +14,10 @@ jobs:
       - name: Checkout commit
         uses: actions/checkout@master
 
-      - name: Set up Python 3.8
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@master
-        with: { python-version: 3.8 }
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Upgrade pip
         run: |
@@ -39,9 +42,10 @@ jobs:
       - name: Checkout commit
         uses: actions/checkout@master
 
-      - name: Set up Python 3.8
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@master
-        with: { python-version: 3.8 }
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Upgrade pip
         run: |
@@ -67,9 +71,10 @@ jobs:
       - name: Checkout commit
         uses: actions/checkout@master
 
-      - name: Set up Python 3.8
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@master
-        with: { python-version: 3.8 }
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Upgrade pip
         run: |

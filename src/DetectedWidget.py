@@ -36,6 +36,7 @@ class DetectedWidget(QWidget):
         super().__init__(parent)
         self.video_path = video_path
         self.data = data
+        self.max_dots = max(data)
         self.raw_video = raw_video
         self.raw_video_frames = self._get_frames()
         self.processed_video_frames = processed_video_frames
@@ -76,7 +77,7 @@ class DetectedWidget(QWidget):
         freeze_graph.setLabel(axis='bottom', text='Video Frame index')
         freeze_graph.plot(self.data)
         freeze_graph.setLimits(xMin=0, yMin=0, xMax=self.frame_len)
-        v_bar1, h_bar1 = self.__make_bar(1000)
+        v_bar1, h_bar1 = self.__make_bar(self.max_dots)
         freeze_graph.addItem(v_bar1)
         freeze_graph.addItem(h_bar1)
 

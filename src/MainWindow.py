@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
         filter: str
         name, filter = QFileDialog.getOpenFileName(
             parent=self, caption='Open File',
-            dir=os.getcwd(), filter="View Files (*.avi)")
+            dir=os.getcwd(), filter="View Files (*.avi *.mp4)")
         print('[video]:' + name)
         if name == '':
             self.status.showMessage('Open video to be processed')
